@@ -1,9 +1,11 @@
 #include <Arduino.h>
+#include <FS.h>
+#include "khikhi.h"
 #include <WiFi.h>
 
 // wifi creds
-const char *ssid = "Londonhoyamiamiaapkabetagayhai";
-const char *password = "merimammiandefekrahihai123*";
+const char *ssid = WIFI_SSID;
+const char *password = WIFI_PASSWORD;
 WiFiServer server(80);
 
 #include <splash.h>
@@ -11,6 +13,13 @@ WiFiServer server(80);
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SH110X.h>
+
+#include <SPI.h>
+#include <SD.h>
+
+#define SD_CS 15
+
+SPIClass spi(VSPI);
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
@@ -22,11 +31,61 @@ WiFiServer server(80);
 
 #define BUZZERPIN 23
 
+
 Adafruit_SH1106G display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 int currentAnim = 0;
 unsigned long lastFrameTime = 0;
 int frameIndex = 0;
+
+void SDSetup() {
+  spi.begin(14, 27, 13, SD_CS);
+
+  if (!SD.begin(SD_CS, spi)) {
+    Serial.println("SD Card mount failed ourr naurrrrr");
+    return;
+  }
+
+  Serial.println("SD Card ready yey");
+}
+
+void listDir(fs::FS &fs, const char * dirname, uint8_t levels, int &id){
+    Serial.printf("Listing directory: %s\n", dirname);
+
+    File root = fs.open(dirname);
+    if(!root){
+        Serial.println("Failed to open directory");
+        return;
+    }
+    if(!root.isDirectory()){
+        Serial.println("Not a directory");
+        return;
+    }
+
+    File file = root.openNextFile();
+    while(file){
+        if(file.isDirectory()){
+            Serial.print("  DIR : ");
+            Serial.println(file.name());
+
+            Serial.print("ID: ");
+            Serial.println(id);
+
+            id++;
+
+            // if(levels){
+            //     listDir(fs, file.path(), levels -1, id);
+            // }
+        }
+        // else {
+        //     Serial.print("  FILE: ");
+        //     Serial.print(file.name());
+        //     Serial.print("  SIZE: ");
+        //     Serial.println(file.size());
+        // }
+        file = root.openNextFile();
+    }
+}
 
 void wifi_setup() {
   delay(10);
@@ -244,6 +303,11 @@ void setup() {
   pinMode(SEARCH_BUTTON, INPUT_PULLUP);
   pinMode(DEFAULT_BUTTON, INPUT_PULLUP);
 
+  SDSetup();
+
+  int id = 0;
+  listDir(SD, "/", 0, id);
+
   ledcAttachPin(BUZZERPIN, 0);
 
   if(!display.begin(0x3C, true)) {
@@ -282,7 +346,7 @@ void loop() {
 
   if (touchval == 1) {
     toggle_frames_millis(uwu_frames, 700, 2);
-    buzzerSong();
+    // buzzerSong();
     delay(200);
   } else {
     if (currentAnim == 0) {
