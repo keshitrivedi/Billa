@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <FS.h>
+#include <vector>
 #include "khikhi.h"
 #include <WiFi.h>
 
@@ -30,6 +31,9 @@ SPIClass spi(VSPI);
 #define SEARCH_BUTTON 18
 
 #define BUZZERPIN 23
+
+std::vector<String> playlistList;
+std::vector<String>currentSongList;
 
 
 Adafruit_SH1106G display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
@@ -71,6 +75,8 @@ void listDir(fs::FS &fs, const char * dirname, uint8_t levels, int &id){
             Serial.print("ID: ");
             Serial.println(id);
 
+            playlistList.push_back(file.path());
+
             id++;
 
             // if(levels){
@@ -85,6 +91,31 @@ void listDir(fs::FS &fs, const char * dirname, uint8_t levels, int &id){
         // }
         file = root.openNextFile();
     }
+}
+
+void displayPlaylist(fs::FS &fs, int id) {
+  currentSongList.clear();
+  File currentPlaylist = fs.open(playlistList[id]);
+
+  if (!currentPlaylist || !currentPlaylist.isDirectory()) {
+    Serial.println("This playlist does not exist");
+    return;
+  }
+
+  File file = currentPlaylist.openNextFile();
+
+  int song = 0;
+  while (file) {
+    if (!file.isDirectory()) {
+      Serial.print(song);
+      Serial.print(": ");
+      Serial.println(file.name());
+      
+      currentSongList.push_back(file.path());
+      song++;
+    }
+    file = currentPlaylist.openNextFile();
+  }
 }
 
 void wifi_setup() {
@@ -307,6 +338,7 @@ void setup() {
 
   int id = 0;
   listDir(SD, "/", 0, id);
+  displayPlaylist(SD, 3);
 
   ledcAttachPin(BUZZERPIN, 0);
 
