@@ -118,6 +118,12 @@ void displayPlaylist(fs::FS &fs, int id) {
   }
 }
 
+int playlistSelect(std::vector<String> &currentSongList) {
+  int chosenPlaylist = 0;
+  int lastPlaylist = currentSongList.size() - 1;
+  return chosenPlaylist;
+}
+
 void wifi_setup() {
   delay(10);
   Serial.println();
