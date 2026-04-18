@@ -39,25 +39,26 @@ void listDir(fs::FS &fs, const char * dirname, uint8_t levels, int &id, std::vec
 
 void displayPlaylist(fs::FS &fs, int id, std::vector<std::string>&currentSongList, std::vector<std::string>&playlistList) {
   currentSongList.clear();
-  File currentPlaylist = fs.open(playlistList[id].c_str());
 
-  if (!currentPlaylist || !currentPlaylist.isDirectory()) {
-    Serial.println("This playlist does not exist");
-    return;
-  }
+    File currentPlaylist = fs.open(playlistList[id].c_str());
 
-  File file = currentPlaylist.openNextFile();
-
-  int song = 0;
-  while (file) {
-    if (!file.isDirectory()) {
-      Serial.print(song);
-      Serial.print(": ");
-      Serial.println(file.name());
-      
-      currentSongList.push_back(file.path());
-      song++;
+    if (!currentPlaylist || !currentPlaylist.isDirectory()) {
+        Serial.println("This playlist does not exist");
+        return;
     }
-    file = currentPlaylist.openNextFile();
-  }
+
+    File file = currentPlaylist.openNextFile();
+
+    int song = 0;
+    while (file) {
+        if (!file.isDirectory()) {
+            Serial.print(song);
+            Serial.print(": ");
+            Serial.println(file.name());
+            
+            currentSongList.push_back(file.path());
+            song++;
+        }
+        file = currentPlaylist.openNextFile();
+    }
 }
