@@ -26,6 +26,7 @@ SPIClass spi(VSPI);
 #define UP 19
 #define DOWN 26
 #define BUZZERPIN 23
+#define SELECT 25
 
 std::vector<std::string> playlistList;
 std::vector<std::string>currentSongList;
@@ -58,6 +59,7 @@ void setup() {
 
   pinMode(UP, INPUT_PULLUP);
   pinMode(DOWN, INPUT_PULLUP);
+  pinMode(SELECT, INPUT_PULLUP);
 
   SDSetup();
 
@@ -76,17 +78,18 @@ void loop() {
   int touchval = digitalRead(TOUCHPIN);
   int searchButtonState = digitalRead(SEARCH_BUTTON);
   int defaultButtonState = digitalRead(DEFAULT_BUTTON);
+  int selectBtnState = digitalRead(SELECT);
 
   int upBtnState = digitalRead(UP);
   int downBtnState = digitalRead(DOWN);
 
   if (searchButtonState == LOW) {
     currentAnim = 2;
-    Serial.println("serach");
+    // Serial.println("serach");
   }
   if (defaultButtonState == LOW) {
     currentAnim = 0;
-    Serial.println("default");
+    // Serial.println("default");
   }
 
   if (touchval == 1) {
@@ -103,5 +106,13 @@ void loop() {
   }
 
   currentPlaylist = Navigayte(playlistList, upBtnState, downBtnState, currentPlaylist);
+  std::string selectedPlaylist = Selectuh(playlistList, selectBtnState, currentPlaylist);
+
+  if (selectedPlaylist != "") {
+    Serial.println("Selected Playlist: ");
+    Serial.println(selectedPlaylist.c_str());
+
+    displayPlaylist(SD, currentPlaylist, currentSongList, playlistList);
+  }
   // listDir(SD, "/", 0, currentPlaylist, playlistList);
 }

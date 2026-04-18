@@ -50,12 +50,14 @@ std::string Selectuh (const std::vector<std::string>&musicEntity, int selectBtnS
 
     static int prevSelectState = HIGH;
 
+    std::string result = "";    
+
     if (selectBtnState == LOW && prevSelectState == HIGH && id >= 0 && id < musicEntity.size()) {
         Serial.println(musicEntity[id].c_str());
-        return musicEntity[id];
+        result = musicEntity[id];
     }
 
     prevSelectState = selectBtnState;
 
-    return "";
+    return result;
 }
