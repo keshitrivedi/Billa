@@ -3,7 +3,8 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SH110X.h>
 
-int currentAnim = 0;
+#include <animations.h>
+
 unsigned long lastFrameTime = 0;
 int frameIndex = 0;
 
@@ -39,7 +40,7 @@ const unsigned char* uwu_clueless_frames[2] = {
   clueless_uwu_2_bits
 };
 
-void toggle_frames(const unsigned char* frames[2], int dly, Adafruit_SH1107 &display) {
+void toggle_frames(const unsigned char* frames[2], int dly, Adafruit_SH1106G &display) {
   for (int i = 0; i < 2; i++) {
     display.clearDisplay();
     display.drawBitmap(0, 0, frames[i], 128, 64, 1);
@@ -48,7 +49,7 @@ void toggle_frames(const unsigned char* frames[2], int dly, Adafruit_SH1107 &dis
   }
 }
 
-void toggle_frames_millis(const unsigned char* frames[2], int dly, int frameNum, Adafruit_SH1107 &display) {
+void toggle_frames_millis(const unsigned char* frames[], int dly, int frameNum, Adafruit_SH1106G &display) {
   unsigned long now = millis();
 
   if (now - lastFrameTime > dly) {
@@ -63,7 +64,7 @@ void toggle_frames_millis(const unsigned char* frames[2], int dly, int frameNum,
 }
 
 // Make sure the number for frames is atleast three ^-^
-void revolve_frames(int sze, const unsigned char* frames[], int dly, Adafruit_SH1107 &display) {
+void revolve_frames(int sze, const unsigned char* frames[], int dly, Adafruit_SH1106G &display) {
   for (int i = 0; i < sze; i++) {
     display.clearDisplay();
     display.drawBitmap(0, 0, frames[i], 128, 64, 1);
@@ -79,7 +80,7 @@ void revolve_frames(int sze, const unsigned char* frames[], int dly, Adafruit_SH
   }
 }
 
-void searchAround(Adafruit_SH1107 &display) {
+void searchAround(Adafruit_SH1106G &display) {
   for (int i = 0; i < 5; i++) {
     display.clearDisplay();
     display.drawBitmap(0, 0, search_frames[i], 128, 64, 1);

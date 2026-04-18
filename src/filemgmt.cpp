@@ -7,7 +7,7 @@
 #include <Arduino.h>
 #include <vector>
 
-void listDir(fs::FS &fs, const char * dirname, uint8_t levels, int &id, std::vector<std::string>&playlistList){
+void listDir(fs::FS &fs, const char * dirname, uint8_t levels, std::vector<std::string>& playlistList){
     Serial.printf("Listing directory: %s\n", dirname);
 
     File root = fs.open(dirname);
@@ -23,15 +23,10 @@ void listDir(fs::FS &fs, const char * dirname, uint8_t levels, int &id, std::vec
     File file = root.openNextFile();
     while(file){
         if(file.isDirectory()){
-            Serial.print("  DIR : ");
+            Serial.print("DIR: ");
             Serial.println(file.name());
 
-            Serial.print("ID: ");
-            Serial.println(id);
-
             playlistList.push_back(file.path());
-
-            id++;
         }
         file = root.openNextFile();
     }
@@ -39,6 +34,11 @@ void listDir(fs::FS &fs, const char * dirname, uint8_t levels, int &id, std::vec
 
 void displayPlaylist(fs::FS &fs, int id, std::vector<std::string>&currentSongList, std::vector<std::string>&playlistList) {
   currentSongList.clear();
+
+    if (id < 0 || id >= playlistList.size()) {
+        Serial.println("Invalid playlist index");
+        return;
+    }
 
     File currentPlaylist = fs.open(playlistList[id].c_str());
 

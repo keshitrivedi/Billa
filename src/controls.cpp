@@ -7,9 +7,13 @@
 #include <vector>
 #include <string>
 
+#include <controls.h>
+
 int Navigayte (const std::vector<std::string>&musicEntity, int upBtnState, int downBtnState, int id) {
+
+    // handle this later pls
     if (musicEntity.empty()) {
-        return;
+        return -1;
     }
 
     static int prevUpState = HIGH;
@@ -33,18 +37,21 @@ int Navigayte (const std::vector<std::string>&musicEntity, int upBtnState, int d
     prevUpState = upBtnState;
     prevDownState = downBtnState;
 
+    Serial.println(id);
+    Serial.println(musicEntity[id].c_str());
     return id;
 }
 
 std::string Selectuh (const std::vector<std::string>&musicEntity, int selectBtnState, int id) {
 
     if (musicEntity.empty()) {
-        return;
+        return "";
     }
 
     static int prevSelectState = HIGH;
 
     if (selectBtnState == LOW && prevSelectState == HIGH && id >= 0 && id < musicEntity.size()) {
+        Serial.println(musicEntity[id].c_str());
         return musicEntity[id];
     }
 
