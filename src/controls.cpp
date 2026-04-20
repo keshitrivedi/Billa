@@ -3,6 +3,12 @@
 // Selection
 // mode
 // go back
+
+//mode
+//up
+//down
+//select
+
 #include <Arduino.h>
 #include <vector>
 #include <string>

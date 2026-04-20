@@ -95,3 +95,24 @@ void searchAround(Adafruit_SH1106G &display) {
     delay(700);
   }
 }
+
+void updateAnimationIndex(int upState, int downState, int &currentAnim, int totalAnims) {
+    static int prevUp = HIGH;
+    static int prevDown = HIGH;
+
+    if (prevUp == HIGH && upState == LOW) currentAnim++;
+    if (prevDown == HIGH && downState == LOW) currentAnim--;
+
+    prevUp = upState;
+    prevDown = downState;
+
+    currentAnim = (currentAnim + totalAnims) % totalAnims;
+}
+
+const unsigned char** animations[] = {
+    blink_frames,
+    uwu_frames,
+    uwu_clueless_frames
+};
+
+int frameCounts[] = {2, 2, 2};

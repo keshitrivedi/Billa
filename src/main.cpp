@@ -11,6 +11,7 @@
 #include <SD.h>
 
 #include <filemgmt.h>
+#include <screenState.h>
 #include <animations.h>
 #include <controls.h>
 #include <ui.h>
@@ -22,8 +23,8 @@ SPIClass spi(VSPI);
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 #define TOUCHPIN 4
-#define DEFAULT_BUTTON 5
-#define SEARCH_BUTTON 18
+#define MODE 5 //dflt
+#define SEARCH_BUTTON 18 //wfce
 #define UP 19
 #define DOWN 26
 #define BUZZERPIN 23
@@ -32,10 +33,14 @@ SPIClass spi(VSPI);
 std::vector<std::string> playlistList;
 std::vector<std::string>currentSongList;
 
+ScreenState currentScreen = PLAYLIST_VIEW;
+
 Adafruit_SH1106G display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 int currentAnim = 0;
 int currentPlaylist = 0;
+
+int prevModeState = HIGH;
 
 // updown state change detection for oled displaying purposes acchhoo
 int oledID = 0;
@@ -59,7 +64,7 @@ void setup() {
 
   pinMode(TOUCHPIN, INPUT);
   pinMode(SEARCH_BUTTON, INPUT_PULLUP);
-  pinMode(DEFAULT_BUTTON, INPUT_PULLUP);
+  pinMode(MODE, INPUT_PULLUP);
 
   pinMode(UP, INPUT_PULLUP);
   pinMode(DOWN, INPUT_PULLUP);
@@ -80,54 +85,82 @@ void setup() {
   prevOledID = -1;
   displayListOLED(display, playlistList, oledID);
   prevOledID = oledID;
+
+  prevModeState = HIGH;
 }
 
 void loop() {
   int touchval = digitalRead(TOUCHPIN);
   int searchButtonState = digitalRead(SEARCH_BUTTON);
-  int defaultButtonState = digitalRead(DEFAULT_BUTTON);
+  int modeButtonState = digitalRead(MODE);
   int selectBtnState = digitalRead(SELECT);
 
   int upBtnState = digitalRead(UP);
   int downBtnState = digitalRead(DOWN);
 
-  // if (searchButtonState == LOW) {
-  //   currentAnim = 2;
-  //   // Serial.println("serach");
-  // }
-  // if (defaultButtonState == LOW) {
-  //   currentAnim = 0;
-  //   // Serial.println("default");
-  // }
+  bool modePressed = (prevModeState == HIGH && modeButtonState == LOW);
+  prevModeState = modeButtonState;
 
-  // if (touchval == 1) {
-  //   toggle_frames_millis(uwu_frames, 700, 2, display);
-  //   delay(200);
-  // } else {
-  //   if (currentAnim == 0) {
-  //     toggle_frames_millis(blink_frames, 700, 2, display);
-  //   } else if (currentAnim == 1) {
-  //     toggle_frames_millis(uwu_frames, 700, 2, display);
-  //   } else if (currentAnim == 2) {
-  //     toggle_frames_millis(uwu_clueless_frames, 700, 2, display);
-  //   }
-  // }
-
-  currentPlaylist = Navigayte(playlistList, upBtnState, downBtnState, currentPlaylist);
-  oledID = currentPlaylist;
-
-  std::string selectedPlaylist = Selectuh(playlistList, selectBtnState, currentPlaylist);
-
-  if (selectedPlaylist != "") {
-    Serial.println("Selected Playlist: ");
-    Serial.println(selectedPlaylist.c_str());
-
-    displayPlaylist(SD, currentPlaylist, currentSongList, playlistList);
+  if (modePressed) {
+    currentScreen = MODE_MENU;
+    oledID = 0;
+    prevOledID = -1;
   }
 
-  if (oledID != prevOledID) {
-    displayListOLED(display, playlistList, oledID);
-    prevOledID = oledID;
+  if (currentScreen == MODE_MENU) {
+
+    oledID = Navigayte(modeMenu, upBtnState, downBtnState, oledID);
+
+    std::string selected = Selectuh(modeMenu, selectBtnState, oledID);
+
+    if (selected != "") {
+
+        if (oledID == 0) currentScreen = ANIMATION_VIEW;
+        else if (oledID == 1) currentScreen = PLAYLIST_VIEW;
+        else if (oledID == 2) currentScreen = NOW_PLAYING;
+
+        prevOledID = -1;
+    }
+
+    if (oledID != prevOledID) {
+        displayListOLED(display, modeMenu, oledID);
+        prevOledID = oledID;
+    }
   }
-  // listDir(SD, "/", 0, currentPlaylist, playlistList);
+
+  if (currentScreen == ANIMATION_VIEW) {
+    updateAnimationIndex(upBtnState, downBtnState, currentAnim, 3);
+
+    if (touchval == 1) {
+      toggle_frames_millis(uwu_frames, 700, 2, display);
+      delay(200);
+    } else {
+        toggle_frames_millis(
+        animations[currentAnim],
+        700,
+        frameCounts[currentAnim],
+        display
+    );
+    }
+  }
+
+
+  if (currentScreen == PLAYLIST_VIEW) {
+    currentPlaylist = Navigayte(playlistList, upBtnState, downBtnState, currentPlaylist);
+    oledID = currentPlaylist;
+
+    std::string selectedPlaylist = Selectuh(playlistList, selectBtnState, currentPlaylist);
+
+    if (selectedPlaylist != "") {
+      Serial.println("Selected Playlist: ");
+      Serial.println(selectedPlaylist.c_str());
+
+      displayPlaylist(SD, currentPlaylist, currentSongList, playlistList);
+    }
+
+    if (oledID != prevOledID) {
+      displayListOLED(display, playlistList, oledID);
+      prevOledID = oledID;
+    }
+  }
 }

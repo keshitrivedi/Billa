@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <Adafruit_SH110X.h>
 #include <vector>
-#include <string.h>
+#include <string>
 
 // displayPlaylistOLED will take the display instance and the playlist, void
 // the y position of the "highlight box" will increment by a set val everytime up or down button is pressed
@@ -18,7 +18,7 @@ void displayListOLED(Adafruit_SH1106G &display, std::vector<std::string>& list, 
     display.clearDisplay();
     display.setTextSize(1);
 
-    int lineHeight = 10;
+    int lineHeight = 12;
     int maxVisible = 6;
 
     int start = selectedIndex - maxVisible / 2;

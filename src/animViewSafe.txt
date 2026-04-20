@@ -1,0 +1,23 @@
+if (currentScreen == ANIMATION_VIEW) {
+    if (searchButtonState == LOW) {
+      currentAnim = 2;
+      // Serial.println("serach");
+    }
+    if (modeButtonState == LOW) {
+      currentAnim = 0;
+      // Serial.println("default");
+    }
+
+    if (touchval == 1) {
+      toggle_frames_millis(uwu_frames, 700, 2, display);
+      delay(200);
+    } else {
+      if (currentAnim == 0) {
+        toggle_frames_millis(blink_frames, 700, 2, display);
+      } else if (currentAnim == 1) {
+        toggle_frames_millis(uwu_frames, 700, 2, display);
+      } else if (currentAnim == 2) {
+        toggle_frames_millis(uwu_clueless_frames, 700, 2, display);
+      }
+    }
+  }
