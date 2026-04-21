@@ -13,8 +13,4 @@ enum ScreenState {
 
 extern ScreenState currentScreen;
 
-std::vector<std::string> modeMenu = {
-    "Animations",
-    "Playlists",
-    "Now Playing"
-};
+extern std::vector<std::string> modeMenu;
