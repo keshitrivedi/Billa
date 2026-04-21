@@ -110,7 +110,6 @@ void loop() {
   }
 
   if (currentScreen == MODE_MENU) {
-    oledID = 0;
     oledID = Navigayte(modeMenu, upBtnState, downBtnState, oledID);
 
     std::string selected = Selectuh(modeMenu, selectBtnState, oledID);
