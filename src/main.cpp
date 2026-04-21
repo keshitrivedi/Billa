@@ -39,6 +39,7 @@ Adafruit_SH1106G display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 int currentAnim = 0;
 int currentPlaylist = 0;
+int currentSong = 0;
 
 int prevModeState = HIGH;
 
@@ -61,6 +62,7 @@ void setup() {
   Serial.begin(115200);
 
   currentPlaylist = 0;
+  currentSong = 0;
 
   pinMode(TOUCHPIN, INPUT);
   pinMode(SEARCH_BUTTON, INPUT_PULLUP);
@@ -108,7 +110,7 @@ void loop() {
   }
 
   if (currentScreen == MODE_MENU) {
-
+    oledID = 0;
     oledID = Navigayte(modeMenu, upBtnState, downBtnState, oledID);
 
     std::string selected = Selectuh(modeMenu, selectBtnState, oledID);
@@ -155,11 +157,32 @@ void loop() {
       Serial.println("Selected Playlist: ");
       Serial.println(selectedPlaylist.c_str());
 
+      currentSong = 0;
+      currentScreen = SONG_VIEW;
       displayPlaylist(SD, currentPlaylist, currentSongList, playlistList);
     }
 
     if (oledID != prevOledID) {
       displayListOLED(display, playlistList, oledID);
+      prevOledID = oledID;
+    }
+  }
+
+  if (currentScreen == SONG_VIEW) {
+    currentSong = Navigayte(currentSongList, upBtnState, downBtnState, currentSong);
+    oledID = currentSong;
+
+    std::string selectedSong = Selectuh(currentSongList, selectBtnState, currentSong);
+
+    if (selectedSong != "") {
+      Serial.println("Selected song: ");
+      Serial.println(selectedSong.c_str());
+
+      currentScreen = NOW_PLAYING;
+    }
+
+    if (oledID != prevOledID) {
+      displayListOLED(display, currentSongList, oledID);
       prevOledID = oledID;
     }
   }
