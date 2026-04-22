@@ -9,6 +9,7 @@
 #include <Adafruit_SH110X.h>
 #include <SPI.h>
 #include <SD.h>
+#include <Audio.h>
 
 #include <filemgmt.h>
 #include <screenState.h>
@@ -24,11 +25,14 @@ SPIClass spi(VSPI);
 #define SCREEN_HEIGHT 64
 #define TOUCHPIN 4
 #define MODE 5 //dflt
-#define SEARCH_BUTTON 18 //wfce
 #define UP 19
 #define DOWN 26
 #define BUZZERPIN 23
 #define SELECT 25
+
+#define WSEL 18
+#define DIN 33
+#define BCK 32
 
 std::vector<std::string> playlistList;
 std::vector<std::string>currentSongList;
@@ -36,6 +40,8 @@ std::vector<std::string>currentSongList;
 ScreenState currentScreen = PLAYLIST_VIEW;
 
 Adafruit_SH1106G display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
+Audio audio;
 
 int currentAnim = 0;
 int currentPlaylist = 0;
@@ -46,6 +52,8 @@ int prevModeState = HIGH;
 // updown state change detection for oled displaying purposes acchhoo
 int oledID = 0;
 int prevOledID = -1;
+
+bool songStarted = false;
 
 void SDSetup() {
   spi.begin(14, 27, 13, SD_CS);
@@ -65,7 +73,6 @@ void setup() {
   currentSong = 0;
 
   pinMode(TOUCHPIN, INPUT);
-  pinMode(SEARCH_BUTTON, INPUT_PULLUP);
   pinMode(MODE, INPUT_PULLUP);
 
   pinMode(UP, INPUT_PULLUP);
@@ -73,6 +80,9 @@ void setup() {
   pinMode(SELECT, INPUT_PULLUP);
 
   SDSetup();
+
+  audio.setPinout(BCK, WSEL, DIN);
+  audio.setVolume(15);
 
   playlistList.clear();
   listDir(SD, "/", 0, playlistList);
@@ -93,7 +103,6 @@ void setup() {
 
 void loop() {
   int touchval = digitalRead(TOUCHPIN);
-  int searchButtonState = digitalRead(SEARCH_BUTTON);
   int modeButtonState = digitalRead(MODE);
   int selectBtnState = digitalRead(SELECT);
 
@@ -134,7 +143,7 @@ void loop() {
 
     if (touchval == 1) {
       toggle_frames_millis(uwu_frames, 700, 2, display);
-      delay(200);
+      // delay(200);
     } else {
         toggle_frames_millis(
         animations[currentAnim],
@@ -185,4 +194,13 @@ void loop() {
       prevOledID = oledID;
     }
   }
+
+  if (currentScreen == NOW_PLAYING) {
+    if(!songStarted) {
+      audio.connecttoFS(SD, currentSongList[currentSong].c_str());
+      songStarted = true;
+    }
+  }
+
+  audio.loop();
 }
