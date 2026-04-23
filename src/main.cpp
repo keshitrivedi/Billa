@@ -64,6 +64,8 @@ void SDSetup() {
   }
 
   Serial.println("SD Card ready yey");
+
+  Serial.println(ESP.getFreeHeap());
 }
 
 void setup() {
@@ -80,6 +82,8 @@ void setup() {
   pinMode(SELECT, INPUT_PULLUP);
 
   SDSetup();
+
+  audio.setBufsize(4096, 8192);
 
   audio.setPinout(BCK, WSEL, DIN);
   audio.setVolume(15);
@@ -102,6 +106,11 @@ void setup() {
 }
 
 void loop() {
+
+  if (millis() % 5000 == 0) {
+    Serial.println(ESP.getFreeHeap());
+  }
+
   int touchval = digitalRead(TOUCHPIN);
   int modeButtonState = digitalRead(MODE);
   int selectBtnState = digitalRead(SELECT);

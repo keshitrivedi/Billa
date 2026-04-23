@@ -43,8 +43,8 @@ int Navigayte (const std::vector<std::string>&musicEntity, int upBtnState, int d
     prevUpState = upBtnState;
     prevDownState = downBtnState;
 
-    Serial.println(id);
-    Serial.println(musicEntity[id].c_str());
+    // Serial.println(id);
+    // Serial.println(musicEntity[id].c_str());
     return id;
 }
 
@@ -59,7 +59,7 @@ std::string Selectuh (const std::vector<std::string>&musicEntity, int selectBtnS
     std::string result = "";    
 
     if (selectBtnState == LOW && prevSelectState == HIGH && id >= 0 && id < musicEntity.size()) {
-        Serial.println(musicEntity[id].c_str());
+        // Serial.println(musicEntity[id].c_str());
         result = musicEntity[id];
     }
 

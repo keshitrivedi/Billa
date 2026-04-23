@@ -8,7 +8,7 @@
 #include <vector>
 
 void listDir(fs::FS &fs, const char * dirname, uint8_t levels, std::vector<std::string>& playlistList){
-    Serial.printf("Listing directory: %s\n", dirname);
+    // Serial.printf("Listing directory: %s\n", dirname);
 
     File root = fs.open(dirname);
     if(!root){
@@ -23,8 +23,8 @@ void listDir(fs::FS &fs, const char * dirname, uint8_t levels, std::vector<std::
     File file = root.openNextFile();
     while(file){
         if(file.isDirectory()){
-            Serial.print("DIR: ");
-            Serial.println(file.name());
+            // Serial.print("DIR: ");
+            // Serial.println(file.name());
 
             playlistList.push_back(file.path());
         }
@@ -52,9 +52,9 @@ void displayPlaylist(fs::FS &fs, int id, std::vector<std::string>&currentSongLis
     int song = 0;
     while (file) {
         if (!file.isDirectory()) {
-            Serial.print(song);
-            Serial.print(": ");
-            Serial.println(file.name());
+            // Serial.print(song);
+            // Serial.print(": ");
+            // Serial.println(file.name());
             
             currentSongList.push_back(file.path());
             song++;
