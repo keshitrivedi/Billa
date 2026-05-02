@@ -67,3 +67,12 @@ std::string Selectuh (const std::vector<std::string>&musicEntity, int selectBtnS
 
     return result;
 }
+
+void pausePlay(Audio &audio, int pauseBtnState) {
+    static int prevPauseState = HIGH;
+    if (prevPauseState == HIGH && pauseBtnState == LOW) {
+        audio.pauseResume();
+    }
+
+    prevPauseState = pauseBtnState;
+}

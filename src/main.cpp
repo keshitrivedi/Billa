@@ -27,7 +27,7 @@ SPIClass spi(VSPI);
 #define MODE 5 //dflt
 #define UP 19
 #define DOWN 26
-#define BUZZERPIN 23
+#define PAUSE 23
 #define SELECT 25
 
 #define WSEL 18
@@ -54,6 +54,7 @@ int oledID = 0;
 int prevOledID = -1;
 
 bool songStarted = false;
+bool enteringPlaylist = false;
 
 void SDSetup() {
   spi.begin(14, 27, 13, SD_CS);
@@ -80,6 +81,7 @@ void setup() {
   pinMode(UP, INPUT_PULLUP);
   pinMode(DOWN, INPUT_PULLUP);
   pinMode(SELECT, INPUT_PULLUP);
+  pinMode(PAUSE, INPUT_PULLUP);
 
   SDSetup();
 
@@ -118,6 +120,8 @@ void loop() {
   int upBtnState = digitalRead(UP);
   int downBtnState = digitalRead(DOWN);
 
+  int pauseBtnState = digitalRead(PAUSE);
+
   bool modePressed = (prevModeState == HIGH && modeButtonState == LOW);
   prevModeState = modeButtonState;
 
@@ -127,6 +131,8 @@ void loop() {
     prevOledID = -1;
   }
 
+  pausePlay(audio, pauseBtnState);
+
   if (currentScreen == MODE_MENU) {
     oledID = Navigayte(modeMenu, upBtnState, downBtnState, oledID);
 
@@ -135,7 +141,17 @@ void loop() {
     if (selected != "") {
 
         if (oledID == 0) currentScreen = ANIMATION_VIEW;
-        else if (oledID == 1) currentScreen = PLAYLIST_VIEW;
+        else if (oledID == 1) {
+          currentScreen = PLAYLIST_VIEW;
+          currentPlaylist = 0;
+          oledID = 0;
+          prevOledID = -1;
+          enteringPlaylist = true;
+          Selectuh(modeMenu, HIGH, 0);
+          Selectuh(playlistList, HIGH, 0);
+          Navigayte(playlistList, HIGH, HIGH, 0);
+          return;
+        }
         else if (oledID == 2) currentScreen = NOW_PLAYING;
 
         prevOledID = -1;
@@ -165,6 +181,20 @@ void loop() {
 
 
   if (currentScreen == PLAYLIST_VIEW) {
+    // listDir(SD, "/", 0, playlistList);
+    // displayListOLED(display, playlistList, oledID);
+    if (enteringPlaylist) {
+      displayListOLED(display, playlistList, currentPlaylist);
+      prevOledID = currentPlaylist;
+      oledID = currentPlaylist;
+      enteringPlaylist = false;
+    }
+
+    Serial.print("PLAYLIST_VIEW oledID: ");
+    Serial.print(oledID);
+    Serial.print(" prevOledID: ");
+    Serial.println(prevOledID);
+
     currentPlaylist = Navigayte(playlistList, upBtnState, downBtnState, currentPlaylist);
     oledID = currentPlaylist;
 
@@ -177,6 +207,7 @@ void loop() {
       currentSong = 0;
       currentScreen = SONG_VIEW;
       displayPlaylist(SD, currentPlaylist, currentSongList, playlistList);
+      prevOledID = -1;
     }
 
     if (oledID != prevOledID) {
@@ -195,6 +226,7 @@ void loop() {
       Serial.println("Selected song: ");
       Serial.println(selectedSong.c_str());
 
+      songStarted = false;
       currentScreen = NOW_PLAYING;
     }
 
